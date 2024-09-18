@@ -1,0 +1,48 @@
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <style>
+    .Mytable {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1px;
+        background-color: #000;
+    }
+    .Mytable div {
+        background-color: #fff;
+        padding: 10px;
+        text-align: center;
+    }
+    .Mytable .header {
+        font-weight: bold;
+        background-color: #f2f2f2;
+       color:#003366;
+    }
+</style>
+    <H3> Message de confirmation commande </H3>
+
+
+    <strong> Votre commande effectué le {{ date }} a été prise en compte </strong>
+    <div> En voici les détails: </div>
+
+    <div class="Mytable">
+                
+        <div scope="col " class='header'>Produits</div>
+        <div scope="col " class='header'>Quantité</div>
+        <div scope="col " class='header'>Total</div>
+   
+
+    
+</div>    
+<strong>Votre montant payé : <span style='color: red'></strong>
+    <em> Tatchum  Developpeur </em>     
+    
+</body>
+</html>

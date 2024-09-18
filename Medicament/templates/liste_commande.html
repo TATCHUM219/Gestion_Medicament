@@ -1,0 +1,200 @@
+{% extends "basic.html" %} 
+{% load custom_filters %}
+{% block content %}
+<style>
+    .livre{
+        
+        text-align:center;
+        padding:6px;
+        font-size: 35px;
+    }
+    .Mytable {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1px;
+        background-color: #000;
+    }
+    .Mytable div {
+        background-color: #fff;
+        padding: 10px;
+        text-align: center;
+    }
+    .Mytable .header {
+        font-weight: bold;
+        background-color: #f2f2f2;
+       color:#003366;
+    }
+</style>
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Liste  des commandes</h1>
+    </div>
+    {% if messages %}
+    {%for mes in messages%}
+    <div class='alert alert-success'>{{mes}}</div>
+     {% endfor %} 
+     {% endif %} 
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h4"> commandes du jour</h1>
+    </div>
+    <div class='row'>
+        {% if commandes %}
+
+        <table class="table table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col">id</th>
+                    <th scope="col">Date et heure</th>
+                    <th scope="col">Informations Expédition</th>
+                    <th scope="col">Client</th>
+                    <th scope="col">Statut livraison</th>
+                    
+                    <th scope="col" class='text-center' colspan='3'>Actions</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                {% for cmd in commandes %}
+                <tr>
+                    <th scope="row">{{cmd.id}}</th>
+                    <td>{{cmd.date_heure}}</td>
+                    <td>
+                        ville: {{cmd.expedition.ville}}<br>
+                        Contact: {{cmd.expedition.contact}} <br>
+                        Adresse: {{cmd.expedition.adresse}}<br>
+                    </td>
+                    <td>{{cmd.client.nom}}</td>
+                    <td>
+                        {% if cmd.est_livre %}
+                        <div class='text-success  livre' ><i class="fa-solid fa-check"></i></div>
+                        {% else %}
+                        <div class='text-danger  livre'><i class="fa-solid fa-xmark"></i></div>
+                        {%endif%}
+                    </td>
+                    
+                    <td><a href=""  data-bs-toggle="modal" data-bs-target="#Modal{{cmd.id}}"  class="btn text-white btn-info">Détails</a></td>
+                    <td><a class="btn btn-primary"data-bs-toggle="modal" data-bs-target="#ModalUpdate{{cmd.id}}" >Modifier</a></td>
+                    {% if user.is_superuser %}
+                    <td><a href="delete-${e.id}" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#ModalDelete{{cmd.id}}">Supprimer</a></td>
+                    {%endif%}
+                </tr>
+
+                <!-- Modal info -->
+<div class="modal fade modal-lg" id="Modal{{cmd.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Informations sur la commande {{cmd.id}}</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <h4><b>Date et heure commande: </b> {{commande.date_heure}} </h4>
+            <h4><b>Client: </b>{{commande.client.nom}} </h4>
+
+            <div class="Mytable">
+                
+                        <div scope="col " class='header'>Produits</div>
+                        <div scope="col " class='header'>Quantité</div>
+                        <div scope="col " class='header'>Total</div>
+                   
+               
+                    {% for ligne in cmd.ligne_commande.all %}
+                    
+                        <div>{{ligne.medicament.libelle}}</div>
+                        <div>{{ligne.qte_cmd}}</div>
+                        <div>{{ligne.medicament.prix|multiply:ligne.qte_cmd}}</div>
+                    
+                    {% endfor %}
+                   
+            </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Retour</button>
+          <a type="button" class="btn btn-primary" href="/achat/{{client.id}}/{{mach.id}}">Ok</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!--modal delete-->
+  <div class="modal fade " id="ModalDelete{{cmd.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Suppression la commande {{cmd.id}}</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            Etes - vous sur de vouloir supprimer cette commande?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Retour</button>
+          <button type="button" class="btn btn-danger btnDelete"   id='{{cmd.id}}'>Oui</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!--modal updatde-->
+  <div class="modal fade modal-lg" id="ModalUpdate{{cmd.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Modification de la commande {{cmd.id}}</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form method='PUT' action='/admin/commandes' >
+                 {% csrf_token %} 
+                 <input name='id_cmd' value={{cmd.id}} type='hidden' >
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="exped" id="flexRadioDefault1" value='true' >
+                <label class="form-check-label bg-success p-1 text-white" for="flexRadioDefault1" >
+                  Expédié
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="exped" id="flexRadioDefault2" value='false' checked>
+                <label class="form-check-label bg-danger p-1 text-white" for="flexRadioDefault2">
+                  Non expédié
+                </label>
+              </div>
+           
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Retour</button>
+          <input type="submit" class="btn btn-primary"   id='{{cmd.id}}' value='Modifier'>
+        </div>
+    </form>
+      </div>
+    </div>
+  </div>
+
+
+                 {% endfor %} 
+            </tbody>
+        </table>
+        {% else %} 
+        <h5 class="alert alert-warning">Aucune commande pour aujourd'hui !</h5>
+        {% endif %} 
+    </div>
+    <a class='btn btn-lg btn-info'>Voir toutes les commandes</a>
+</main>
+<script>
+   const btnDelete=document.querySelectorAll('.btnDelete')
+   btnDelete.forEach(
+    btn => {
+        btn.addEventListener('click',()=>{
+            fetch(`/deleteCommande/${btn.id}`,{method:'delete',  headers: {
+                'Content-Type': 'application/json'
+            },})
+            .then(res => res.json())
+            .then((data) => console.log(data.success))
+            .catch((e)=>console.log(e))
+        })
+    }
+   )
+</script>
+{% endblock content %}
+
